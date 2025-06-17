@@ -1,43 +1,36 @@
 const { Pool } = require('pg');
 const mongoose = require('mongoose');
-const redis = require('redis');
 require('dotenv').config();
 
 // PostgreSQL Configuration
 const pgPool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: process.env.PG_PORT,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+pgPool.on('error', (err) => {
+  console.error('Unexpected error on idle PostgreSQL client', err);
+  process.exit(-1);
 });
 
 // MongoDB Configuration
+const mongoURI = process.env.MONGODB_URI;
+
 const connectMongoDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURI);
     console.log('MongoDB connected successfully');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
     process.exit(1);
   }
 };
 
-// Redis Configuration
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL,
-});
-
-redisClient.on('error', (err) => {
-  console.error('Redis Client Error:', err);
-});
-
-redisClient.on('connect', () => {
-  console.log('Redis connected successfully');
-});
-
 module.exports = {
   pgPool,
-  connectMongoDB,
-  redisClient,
+  connectMongoDB
 };

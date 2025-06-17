@@ -1,46 +1,26 @@
-const { verifyToken } = require('../utils/jwt');
-const { redisClient } = require('../config/database');
-const User = require('../models/postgres/User');
+const jwt = require('jsonwebtoken');
+const { response } = require('../utils/response');
+const { JWT_SECRET } = require('../utils/constants');
 
-const authenticateToken = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      return res.status(401).json({ error: 'Access token required' });
-    }
-
-    // Check if token is blacklisted
-    const isBlacklisted = await redisClient.get(`blacklist_${token}`);
-    if (isBlacklisted) {
-      return res.status(401).json({ error: 'Token has been revoked' });
-    }
-
-    const decoded = verifyToken(token);
-    const user = await User.findById(decoded.userId);
-
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Invalid or expired token' });
+module.exports = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+    return response(res, 401, 'Access token required');
   }
-};
 
-const authorizeRoles = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return response(res, 403, 'Invalid or expired token');
     }
+    
+    req.user = {
+      id: user.id,
+      role: user.role,
+      countyId: user.countyId
+    };
+    
     next();
-  };
-};
-
-module.exports = {
-  authenticateToken,
-  authorizeRoles,
+  });
 };
