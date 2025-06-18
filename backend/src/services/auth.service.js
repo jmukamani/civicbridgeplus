@@ -1,106 +1,163 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/postgres/user.model');
+const bcrypt = require('bcryptjs');
 const { redisClient } = require('../config/redis');
-const EmailService = require('./email.service');
-const { JWT_SECRET, JWT_REFRESH_SECRET } = require('../utils/constants');
+const logger = require('../utils/logger');
+const { User } = require('../models/postgres/user.model');
+const { sendEmail } = require('../config/email');
 
-class AuthService {
-  async register(userData) {
-    const existingUser = await User.findByEmail(userData.email);
-    if (existingUser) {
-      throw new Error('Email already in use');
+/**
+ * Generate JWT token
+ */
+const generateToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+};
+
+/**
+ * Generate refresh token
+ */
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    { id: user.id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+  );
+};
+
+/**
+ * Hash password
+ */
+const hashPassword = async (password) => {
+  return await bcrypt.hash(password, 10);
+};
+
+/**
+ * Verify password
+ */
+const verifyPassword = async (password, hash) => {
+  return await bcrypt.compare(password, hash);
+};
+
+/**
+ * Generate password reset token
+ */
+const generatePasswordResetToken = async (userId) => {
+  const token = jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  // Store token in Redis
+  await redisClient.set(`reset:${userId}`, token, 'EX', 3600);
+
+  return token;
+};
+
+/**
+ * Verify password reset token
+ */
+const verifyPasswordResetToken = async (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    // Check if token exists in Redis
+    const storedToken = await redisClient.get(`reset:${userId}`);
+    if (!storedToken || storedToken !== token) {
+      return null;
     }
 
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    
-    const user = await User.create({
-      ...userData,
-      password: hashedPassword
-    });
+    return userId;
+  } catch (error) {
+    logger.error('Error verifying password reset token:', error);
+    return null;
+  }
+};
 
-    if (userData.role !== 'citizen') {
-      const verificationToken = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1d' });
-      await EmailService.sendVerificationEmail(user.email, verificationToken);
+/**
+ * Send verification email
+ */
+const sendVerificationEmail = async (user) => {
+  const token = jwt.sign(
+    { id: user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: '1d' }
+  );
+
+  // Store token in Redis
+  await redisClient.set(`verify:${user.id}`, token, 'EX', 86400);
+
+  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+
+  await sendEmail({
+    to: user.email,
+    subject: 'Verify Your Email Address',
+    html: `
+      <p>Hello ${user.first_name},</p>
+      <p>Please click the following link to verify your email address:</p>
+      <p><a href="${verificationUrl}">${verificationUrl}</a></p>
+      <p>If you did not request this, please ignore this email.</p>
+    `
+  });
+};
+
+/**
+ * Verify email token
+ */
+const verifyEmailToken = async (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    // Check if token exists in Redis
+    const storedToken = await redisClient.get(`verify:${userId}`);
+    if (!storedToken || storedToken !== token) {
+      return false;
     }
 
-    return user;
-  }
-
-  async login(email, password) {
-    const user = await User.findByEmail(email);
-    if (!user) throw new Error('Invalid credentials');
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) throw new Error('Invalid credentials');
-
-    if (!user.is_verified) throw new Error('Account not verified');
-
-    const accessToken = jwt.sign(
-      { id: user.id, role: user.role, countyId: user.county_id },
-      JWT_SECRET,
-      { expiresIn: '15m' }
-    );
-
-    const refreshToken = jwt.sign(
-      { id: user.id },
-      JWT_REFRESH_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    await redisClient.set(`refresh_${user.id}`, refreshToken, { EX: 604800 }); // 7 days
-
-    return {
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.first_name,
-        lastName: user.last_name
-      },
-      accessToken,
-      refreshToken
-    };
-  }
-
-  async refreshToken(refreshToken) {
-    try {
-      const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
-      const storedToken = await redisClient.get(`refresh_${payload.id}`);
-      
-      if (storedToken !== refreshToken) {
-        throw new Error('Invalid refresh token');
-      }
-
-      const user = await User.findById(payload.id);
-      if (!user) throw new Error('User not found');
-
-      const newAccessToken = jwt.sign(
-        { id: user.id, role: user.role, countyId: user.county_id },
-        JWT_SECRET,
-        { expiresIn: '15m' }
-      );
-
-      const newRefreshToken = jwt.sign(
-        { id: user.id },
-        JWT_REFRESH_SECRET,
-        { expiresIn: '7d' }
-      );
-
-      await redisClient.set(`refresh_${user.id}`, newRefreshToken, { EX: 604800 });
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken
-      };
-    } catch (err) {
-      throw new Error('Invalid or expired refresh token');
+    // Update user verification status
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return false;
     }
-  }
 
-  async logout(userId) {
-    await redisClient.del(`refresh_${userId}`);
-  }
-}
+    user.is_verified = true;
+    await user.save();
 
-module.exports = new AuthService();
+    // Remove token from Redis
+    await redisClient.del(`verify:${userId}`);
+
+    return true;
+  } catch (error) {
+    logger.error('Error verifying email token:', error);
+    return false;
+  }
+};
+
+/**
+ * Invalidate all sessions for a user
+ */
+const invalidateSessions = async (userId) => {
+  // Remove refresh token from Redis
+  await redisClient.del(`refresh:${userId}`);
+};
+
+module.exports = {
+  generateToken,
+  generateRefreshToken,
+  hashPassword,
+  verifyPassword,
+  generatePasswordResetToken,
+  verifyPasswordResetToken,
+  sendVerificationEmail,
+  verifyEmailToken,
+  invalidateSessions
+};

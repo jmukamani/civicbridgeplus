@@ -1,46 +1,92 @@
-const { pgPool } = require('../../config/database');
+const { DataTypes } = require('sequelize');
+const bcrypt = require('bcryptjs');
+const { sequelize } = require('../../config/database');
 
-class User {
-  static async findByEmail(email) {
-    const result = await pgPool.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
-    );
-    return result.rows[0];
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true
+    }
+  },
+  password_hash: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  first_name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  last_name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  phone_number: {
+    type: DataTypes.STRING,
+    validate: {
+      is: /^\+?[0-9]{10,15}$/
+    }
+  },
+  role: {
+    type: DataTypes.ENUM('citizen', 'representative', 'admin'),
+    defaultValue: 'citizen'
+  },
+  county_id: {
+    type: DataTypes.UUID,
+    references: {
+      model: 'Counties',
+      key: 'id'
+    }
+  },
+  constituency_id: {
+    type: DataTypes.UUID,
+    references: {
+      model: 'Constituencies',
+      key: 'id'
+    }
+  },
+  is_verified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  last_login: {
+    type: DataTypes.DATE
   }
+}, {
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+  hooks: {
+    beforeSave: async (user) => {
+      if (user.changed('password_hash')) {
+        user.password_hash = await bcrypt.hash(user.password_hash, 10);
+      }
+    }
+  }
+});
 
-  static async findById(id) {
-    const result = await pgPool.query(
-      'SELECT * FROM users WHERE id = $1',
-      [id]
-    );
-    return result.rows[0];
-  }
+User.prototype.verifyPassword = async function(password) {
+  return await bcrypt.compare(password, this.password_hash);
+};
 
-  static async create({ email, password, firstName, lastName, phone, role, countyId, constituencyId }) {
-    const result = await pgPool.query(
-      `INSERT INTO users (email, password, first_name, last_name, phone, role, county_id, constituency_id, is_verified)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING *`,
-      [email, password, firstName, lastName, phone, role, countyId, constituencyId, role === 'citizen']
-    );
-    return result.rows[0];
-  }
-
-  static async updateRefreshToken(id, refreshToken) {
-    await pgPool.query(
-      'UPDATE users SET refresh_token = $1 WHERE id = $2',
-      [refreshToken, id]
-    );
-  }
-
-  static async verifyUser(id) {
-    const result = await pgPool.query(
-      'UPDATE users SET is_verified = true WHERE id = $1 RETURNING *',
-      [id]
-    );
-    return result.rows[0];
-  }
-}
+User.associate = (models) => {
+  User.belongsTo(models.County, { foreignKey: 'county_id' });
+  User.belongsTo(models.Constituency, { foreignKey: 'constituency_id' });
+  User.hasOne(models.Representative, { foreignKey: 'user_id' });
+  User.hasMany(models.Message, { foreignKey: 'sender_id' });
+  User.hasMany(models.Message, { foreignKey: 'recipient_id' });
+  User.hasMany(models.Policy, { foreignKey: 'uploaded_by' });
+};
 
 module.exports = User;

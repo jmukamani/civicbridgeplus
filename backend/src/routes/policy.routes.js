@@ -1,28 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const PolicyController = require('../controllers/policy.controller');
-const { auth } = require('../middleware/auth');
-const { rbac } = require('../middleware/rbac');
-const { fileUpload } = require('../middleware/fileUpload');
+const policyController = require('../controllers/policy.controller.js');
+const { verifyToken } = require('../middleware/auth');
+const { validate, schemas } = require('../middleware/validation');
+const { uploadSingle } = require('../middleware/fileUpload');
 
-router.post(
-  '/',
-  auth,
-  rbac(['admin', 'representative']),
-  fileUpload('document'),
-  PolicyController.createPolicy
-);
-
-router.get(
-  '/county/:countyId',
-  auth,
-  PolicyController.getPoliciesByCounty
-);
-
-router.get(
-  '/search',
-  auth,
-  PolicyController.searchPolicies
-);
+router.get('/', verifyToken, policyController.getAllPolicies);
+router.get('/:id', verifyToken, policyController.getPolicyById);
+router.post('/', verifyToken, uploadSingle('file'), validate(schemas.policy), policyController.createPolicy);
+router.put('/:id', verifyToken, uploadSingle('file'), policyController.updatePolicy);
+router.delete('/:id', verifyToken, policyController.deletePolicy);
+router.get('/search', verifyToken, policyController.searchPolicies);
+router.get('/county/:countyId', verifyToken, policyController.getPoliciesByCounty);
+router.get('/:id/download', verifyToken, policyController.downloadPolicy);
 
 module.exports = router;

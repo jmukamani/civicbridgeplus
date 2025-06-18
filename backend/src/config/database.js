@@ -1,36 +1,42 @@
-const { Pool } = require('pg');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const { Sequelize } = require('sequelize');
+const logger = require('../utils/logger');
 
-// PostgreSQL Configuration
-const pgPool = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+const sequelize = new Sequelize(
+  process.env.POSTGRES_DB,
+  process.env.POSTGRES_USER,
+  process.env.POSTGRES_PASSWORD,
+  {
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    dialect: 'postgres',
+    pool: {
+      max: parseInt(process.env.POSTGRES_POOL_MAX),
+      min: parseInt(process.env.POSTGRES_POOL_MIN),
+      idle: parseInt(process.env.POSTGRES_POOL_IDLE),
+      acquire: parseInt(process.env.POSTGRES_POOL_ACQUIRE)
+    },
+    logging: process.env.NODE_ENV === 'development' ? msg => logger.debug(msg) : false,
+    dialectOptions: {
+      ssl: process.env.POSTGRES_SSL === 'true' ? {
+        require: true,
+        rejectUnauthorized: false
+      } : false
+    }
+  }
+);
 
-pgPool.on('error', (err) => {
-  console.error('Unexpected error on idle PostgreSQL client', err);
-  process.exit(-1);
-});
-
-// MongoDB Configuration
-const mongoURI = process.env.MONGODB_URI;
-
-const connectMongoDB = async () => {
+const checkDatabaseConnection = async () => {
   try {
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB connected successfully');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
+    await sequelize.authenticate();
+    logger.info('Database connection has been established successfully.');
+    return true;
+  } catch (error) {
+    logger.error('Unable to connect to the database:', error);
+    return false;
   }
 };
 
 module.exports = {
-  pgPool,
-  connectMongoDB
+  sequelize,
+  checkDatabaseConnection
 };
