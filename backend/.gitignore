@@ -4,7 +4,9 @@ npm-debug.log*
 yarn-error.log
 package-lock.json
 node_modules/ssh2/test/fixtures/id_rsa
+  path: node_modules/ssh2/test/fixtures/id_rsa:1
 
+# Logs
 # Logs
 logs
 *.log
