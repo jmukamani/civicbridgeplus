@@ -32,9 +32,10 @@ const schemas = {
   register: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
-    first_name: Joi.string().required(),
-    last_name: Joi.string().required(),
-    phone_number: Joi.string().pattern(/^\+?[0-9]{10,15}$/),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/),
+    role: Joi.string().valid('citizen', 'representative', 'admin'),
     county_id: Joi.string().uuid(),
     constituency_id: Joi.string().uuid()
   }),

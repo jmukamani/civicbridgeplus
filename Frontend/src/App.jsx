@@ -1,102 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import Sidebar from './components/common/Sidebar';
-import Header from './components/common/Header';
-import AuthForm from './components/auth/AuthForm';
-import HomePage from './components/home/HomePage';
-import Dashboard from './components/dashboard/Dashboard';
-import Representatives from './components/representatives/Representatives';
-import PolicyAnalysis from './components/policy/PolicyAnalysis';
-import Settings from './components/Settings/Settings';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from '../src/store/store';
+import MainLayout from './components/auth/layout/MainLayout';
+import LandingPage from '../src/pages/LandingPage';
+import LoginForm from './components/auth/auth/LoginForm';
+import RegisterForm from './components/auth/auth/RegisterForm';
+import Unauthorized from '../src/pages/Unauthorized';
+import NotFound from '../src/pages/NotFound';
+import ProtectedRoute from './components/auth/common/ProtectedRoute';
 
-const CivicBridgePulseApp = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const auth = localStorage.getItem('isAuthenticated');
-    return auth === 'true';
-  });
-  
-  const [currentUser, setCurrentUser] = useState(() => {
-    const user = localStorage.getItem('currentUser');
-    try {
-      return user ? JSON.parse(user) : null;
-    } catch {
-      return null;
-    }
-  });
-  
-  const [language, setLanguage] = useState('en');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+// Citizen Pages
+import CitizenDashboard from '../src/pages/citizen/Dashboard';
+import PolicyBrowser from '../src/pages/citizen/PolicyBrowser';
+import MessageCenter from '../src/pages/citizen/MessageCenter';
 
-  const handleAuthSuccess = (user) => {
-    console.log('Auth success - user:', user);
-    setCurrentUser(user);
-    setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('currentUser', JSON.stringify(user));
-  };
+// Representative Pages
+import RepresentativeDashboard from '../src/pages/representative/Dashboard';
+import MessageManagement from '../src/pages/representative/MessageManagement';
+import PolicyManagement from '../src/pages/representative/PolicyManagement';
+import PolicyUpload from '../src/pages/representative/PolicyUpload';
 
-  const ProtectedLayout = () => {
-    console.log('ProtectedLayout - isAuthenticated:', isAuthenticated);
-    
-    if (!isAuthenticated) {
-      console.log('Not authenticated, redirecting to login');
-      return <Navigate to="/login" />;
-    }
+// Admin Pages
+import AdminDashboard from '../src/pages/admin/Dashboard';
+import UserManagement from '../src/pages/admin/UserManagement';
+import SystemAnalytics from '../src/pages/admin/SystemAnalytics';
 
-    return (
-      <div className="flex h-screen bg-gray-50">
-        <Sidebar 
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          currentUser={currentUser}
-          language={language}
-        />
-        
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header 
-            language={language} 
-            setLanguage={setLanguage} 
-            setSidebarOpen={setSidebarOpen} 
-          />
-
-          <main className="flex-1 overflow-y-auto p-6">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-    );
-  };
-
+function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage setLanguage={setLanguage} language={language} />} />
-      <Route path="/register" element={<AuthForm isLogin={false} onAuthSuccess={handleAuthSuccess} language={language} />} />
-      <Route path="/login" element={<AuthForm isLogin={true} onAuthSuccess={handleAuthSuccess} language={language} />} />
+    <Provider store={store}>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
-      <Route element={<ProtectedLayout />}>
-        <Route index element={<Dashboard currentUser={currentUser} language={language} />} />
-        <Route path="/dashboard" element={<Dashboard currentUser={currentUser} language={language} />} />
-        <Route path="/policy-analysis" element={<PolicyAnalysis language={language} />} />
-        <Route path="/representatives" element={<Representatives language={language} />} />
-        <Route path="/settings" element={
-          <Settings 
-            currentUser={currentUser}
-            language={language}
-            setLanguage={setLanguage}
-            setIsAuthenticated={setIsAuthenticated}
-            setCurrentUser={setCurrentUser}
-          />
-        } />
-      </Route>
-    </Routes>
+          {/* Citizen Protected Routes */}
+          <Route element={<MainLayout />}>
+            <Route element={<ProtectedRoute roles={['citizen']} />}>
+              <Route path="/citizen/dashboard" element={<CitizenDashboard />} />
+              <Route path="/citizen/policies" element={<PolicyBrowser />} />
+              <Route path="/citizen/messages" element={<MessageCenter />} />
+            </Route>
+
+            {/* Representative Protected Routes */}
+            <Route element={<ProtectedRoute roles={['representative']} />}>
+              <Route path="/representative/dashboard" element={<RepresentativeDashboard />} />
+              <Route path="/representative/messages" element={<MessageManagement />} />
+              <Route path="/representative/policies" element={<PolicyManagement />} />
+              <Route path="/representative/policies/upload" element={<PolicyUpload />} />
+              <Route path="/representative/policies/edit/:id" element={<PolicyUpload />} />
+            </Route>
+
+            {/* Admin Protected Routes */}
+            <Route element={<ProtectedRoute roles={['admin']} />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/analytics" element={<SystemAnalytics />} />
+            </Route>
+          </Route>
+
+          {/* 404 Not Found */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
-};
+}
 
-export default CivicBridgePulseApp;
+export default App;

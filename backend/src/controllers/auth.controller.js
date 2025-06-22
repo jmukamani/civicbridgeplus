@@ -12,7 +12,7 @@ const { APIError, BadRequestError } = require('../utils/response');
  */
 const register = async (req, res, next) => {
   try {
-    const { email, password, first_name, last_name, phone_number, county_id, constituency_id } = req.body;
+    const { firstName, lastName, email, password, phone, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -22,14 +22,14 @@ const register = async (req, res, next) => {
 
     // Create new user
     const user = await User.create({
+      first_name: firstName,
+      last_name: lastName,
       email,
       password_hash: password,
-      first_name,
-      last_name,
-      phone_number,
-      county_id,
-      constituency_id,
-      role: 'citizen'
+      phone_number: phone,
+      role,
+      // county_id: ... (if you have it)
+      // constituency_id: ... (if you have it)
     });
 
     // Generate verification token

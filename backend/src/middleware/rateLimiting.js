@@ -37,7 +37,7 @@ const globalLimiter = rateLimit({
  */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // limit each IP to 20 requests per windowMs
+  max: 100, // allow more requests for dev
   store: redisStore,
   handler: (req, res, next) => {
     next(new TooManyRequestsError('Too many auth requests, please try again later'));
