@@ -12,7 +12,7 @@ import './ConversationList';
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import { toast } from 'react-hot-toast';
-import { ArrowLeft, Send } from 'lucide-react';
+import { ArrowLeft, Send, Plus } from 'lucide-react';
 import LoadingSpinner from '../../components/auth/common/LoadingSpinner';
 
 const MessageCenter = () => {
@@ -135,18 +135,16 @@ const MessageCenter = () => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="flex flex-col md:flex-row h-full">
         {/* Conversation List */}
         <div className={`md:w-1/3 border-r ${selectedConversation ? 'hidden md:block' : 'block'}`}>
           <div className="p-4 border-b flex justify-between items-center">
-            <h2 className="text-xl font-semibold">{t('messages.title')}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('messages.title')}</h2>
             <button
               onClick={() => setIsModalOpen(true)}
               disabled={!isOnline}
-              className={`btn-primary p-2 rounded-full ${
-                !isOnline ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Plus size={20} />
             </button>
@@ -166,12 +164,12 @@ const MessageCenter = () => {
             <div className="p-4 border-b flex items-center">
               <button
                 onClick={() => setSelectedConversation(null)}
-                className="md:hidden mr-4"
+                className="md:hidden mr-4 text-gray-600 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <ArrowLeft size={20} />
               </button>
               <div>
-                <h3 className="font-semibold">
+                <h3 className="font-semibold text-gray-900">
                   {selectedConversation.recipient.name}
                 </h3>
                 <p className="text-sm text-gray-500">
@@ -185,22 +183,22 @@ const MessageCenter = () => {
               userId={user.id}
             />
             
-            <div className="p-4 border-t flex">
+            <div className="p-4 border-t flex bg-gray-50">
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={t('messages.typeMessage')}
-                className="flex-1 form-input rounded-r-none"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white disabled:bg-gray-100"
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 disabled={!isOnline}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim() || !isOnline || isSending}
-                className="btn-primary rounded-l-none px-4"
+                className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {isSending ? <LoadingSpinner small white /> : <Send size={20} />}
+                <Send size={18} />
               </button>
             </div>
           </div>

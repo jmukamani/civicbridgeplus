@@ -1,4 +1,4 @@
-const { User } = require('../models/postgres/user.model');
+const User = require('../models/postgres/user.model');
 const { Representative } = require('../models/postgres/representative.model');
 const { Policy } = require('../models/postgres/policy.model');
 const { Message } = require('../models/postgres/message.model');

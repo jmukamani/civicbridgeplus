@@ -1,0 +1,8 @@
+  frontend:
+    build:
+      context: ./civic-frontend
+    container_name: civic_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

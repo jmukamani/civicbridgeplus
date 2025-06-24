@@ -1,5 +1,5 @@
 const { Notification } = require('../models/mongodb/notification.model');
-const { User } = require('../models/postgres/user.model');
+const User = require('../models/postgres/user.model');
 const logger = require('../utils/logger');
 const { APIError, NotFoundError } = require('../utils/response');
 

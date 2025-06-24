@@ -110,10 +110,9 @@ const PolicyBrowser = () => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold mb-6">{t('policyBrowser.title')}</h1>
-        
+    <div className="space-y-8">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">{t('policyBrowser.title')}</h1>
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -122,18 +121,16 @@ const PolicyBrowser = () => {
             <input
               type="text"
               placeholder={t('policyBrowser.searchPlaceholder')}
-              className="form-input pl-10 w-full"
+              className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
           <PolicyFilter 
             filters={filters}
             setFilters={setFilters}
           />
         </div>
-        
         {filteredPolicies.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPolicies.map(policy => (

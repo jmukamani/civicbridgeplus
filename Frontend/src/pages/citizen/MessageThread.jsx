@@ -6,7 +6,7 @@ const MessageThread = ({ messages, userId }) => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
       {messages.length > 0 ? (
         messages.map((message) => (
           <div
@@ -16,10 +16,10 @@ const MessageThread = ({ messages, userId }) => {
             }`}
           >
             <div
-              className={`max-w-xs md:max-w-md rounded-lg p-3 ${
+              className={`max-w-xs md:max-w-md rounded-lg p-3 shadow-sm border border-gray-200 ${
                 message.senderId === userId
-                  ? 'bg-kenya-red text-white'
-                  : 'bg-gray-100'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-900'
               }`}
             >
               <p>{message.content}</p>

@@ -1,4 +1,5 @@
-const { User, Representative, County, Constituency } = require('../models/postgres/user.model');
+const User = require('../models/postgres/user.model');
+const { Representative, County, Constituency } = require('../models/postgres/user.model');
 const logger = require('../utils/logger');
 const { APIError, NotFoundError, ForbiddenError } = require('../utils/response');
 

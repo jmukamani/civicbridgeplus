@@ -1,6 +1,6 @@
 const { Policy } = require('../models/postgres/policy.model');
 const { County } = require('../models/postgres/county.model');
-const { User } = require('../models/postgres/user.model');
+const User = require('../models/postgres/user.model');
 const { upload, deleteFile } = require('../config/storage');
 const logger = require('../utils/logger');
 const { APIError, NotFoundError, ForbiddenError } = require('../utils/response');

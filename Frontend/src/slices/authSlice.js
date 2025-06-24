@@ -37,12 +37,24 @@ export const { setCredentials, logout, setLoading, setError, clearError } = auth
 
 export default authSlice.reducer;
 
+function mapUser(user) {
+  if (!user) return user;
+  return {
+    ...user,
+    firstName: user.first_name,
+    lastName: user.last_name,
+    county: user.county_id,
+    constituency: user.constituency_id,
+    // add more mappings as needed
+  };
+}
+
 export const login = (credentials) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
     const response = await api.post('/auth/login', credentials);
-    const { user, token } = response.data;
-    
+    let { user, token } = response.data.data;
+    user = mapUser(user);
     localStorage.setItem('token', token);
     dispatch(setCredentials({ user, token }));
     dispatch(setLoading(false));
@@ -57,14 +69,17 @@ export const login = (credentials) => async (dispatch) => {
 export const register = (userData) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
+    console.log('Sending registration request with:', userData);
     const response = await api.post('/auth/register', userData);
-    const { user, token } = response.data;
-    
+    console.log('Registration response:', response);
+    let { user, token } = response.data.data;
+    user = mapUser(user);
     localStorage.setItem('token', token);
     dispatch(setCredentials({ user, token }));
     dispatch(setLoading(false));
     return user;
   } catch (error) {
+    console.error('Registration error details:', error);
     dispatch(setError(error.response?.data?.message || 'Registration failed'));
     dispatch(setLoading(false));
     throw error;

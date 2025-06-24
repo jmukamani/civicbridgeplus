@@ -8,12 +8,12 @@ const Unauthorized = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-lg shadow-md p-8 max-w-md w-full text-center">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-w-md w-full text-center">
         <div className="flex justify-center mb-6">
-          <ShieldAlert className="text-red-500 w-12 h-12" />
+          <ShieldAlert className="text-red-600 w-12 h-12" />
         </div>
         
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
           {t('unauthorized.title')}
         </h1>
         
@@ -24,14 +24,14 @@ const Unauthorized = () => {
         <div className="flex flex-col space-y-3">
           <Link
             to="/"
-            className="btn-primary py-2 px-4 rounded-md text-center"
+            className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center transition-colors"
           >
             {t('unauthorized.goHome')}
           </Link>
           
           <Link
             to="/login"
-            className="text-kenya-red hover:underline text-sm"
+            className="text-blue-600 hover:text-blue-800 text-sm hover:underline transition-colors"
           >
             {t('unauthorized.loginWithDifferentAccount')}
           </Link>

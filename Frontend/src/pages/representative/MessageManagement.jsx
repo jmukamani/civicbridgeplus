@@ -123,10 +123,9 @@ const MessageManagement = () => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-4 border-b flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold">{t('repMessages.title')}</h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('repMessages.title')}</h2>
         <div className="flex flex-1 max-w-md">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -135,18 +134,17 @@ const MessageManagement = () => {
             <input
               type="text"
               placeholder={t('repMessages.searchPlaceholder')}
-              className="form-input pl-10 w-full"
+              className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
-        
         <div className="flex space-x-2">
           <select
             value={selectedFilter}
             onChange={(e) => setSelectedFilter(e.target.value)}
-            className="form-select"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
           >
             <option value="pending">{t('repMessages.filterPending')}</option>
             <option value="responded">{t('repMessages.filterResponded')}</option>
@@ -155,38 +153,36 @@ const MessageManagement = () => {
           </select>
         </div>
       </div>
-      
       {/* Bulk Actions Bar */}
       {selectedMessages.length > 0 && (
-        <div className="bg-gray-100 p-2 flex items-center justify-between">
-          <div className="text-sm">
+        <div className="bg-blue-50 p-2 flex items-center justify-between border-b border-blue-200">
+          <div className="text-sm text-gray-700">
             {t('repMessages.selectedCount', { count: selectedMessages.length })}
           </div>
           <div className="space-x-2">
             <button
               onClick={() => handleBulkAction('respond')}
-              className="btn-primary px-3 py-1 text-sm"
+              className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             >
               <Check size={16} className="mr-1 inline" />
               {t('repMessages.markAsResponded')}
             </button>
             <button
               onClick={() => setSelectedMessages([])}
-              className="text-gray-600 hover:text-gray-800 text-sm"
+              className="text-gray-600 hover:text-blue-600 text-sm focus:outline-none"
             >
               {t('repMessages.clearSelection')}
             </button>
           </div>
         </div>
       )}
-      
       {/* Messages List */}
       <div className="divide-y">
         {filteredMessages.length > 0 ? (
           filteredMessages.map(message => (
             <div 
               key={message.id} 
-              className={`p-4 hover:bg-gray-50 ${
+              className={`p-4 hover:bg-gray-50 transition-colors ${
                 selectedMessages.includes(message.id) ? 'bg-blue-50' : ''
               }`}
             >
@@ -195,7 +191,7 @@ const MessageManagement = () => {
                   type="checkbox"
                   checked={selectedMessages.includes(message.id)}
                   onChange={() => toggleSelectMessage(message.id)}
-                  className="mt-1 mr-3"
+                  className="mt-1 mr-3 accent-blue-600"
                 />
                 
                 <div className="flex-1">

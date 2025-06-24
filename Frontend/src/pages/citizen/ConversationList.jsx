@@ -41,16 +41,16 @@ const ConversationList = ({ onSelect, selectedId, isOnline }) => {
           <div
             key={conversation.id}
             onClick={() => onSelect(conversation)}
-            className={`p-4 cursor-pointer ${
-              conversation.id === selectedId ? 'bg-gray-100' : 'hover:bg-gray-50'
+            className={`p-4 cursor-pointer transition-colors ${
+              conversation.id === selectedId ? 'bg-blue-50' : 'hover:bg-gray-50'
             }`}
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-medium">
+                <h3 className="font-semibold text-gray-900">
                   {conversation.recipient.name}
                   {conversation.unreadCount > 0 && (
-                    <span className="ml-2 bg-kenya-red text-white text-xs px-2 py-1 rounded-full">
+                    <span className="ml-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                       {conversation.unreadCount}
                     </span>
                   )}

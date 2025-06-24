@@ -42,14 +42,14 @@ const MessagePreview = ({ isOnline }) => {
           <Link
             key={message.id}
             to={`/citizen/messages/thread/${message.id}`}
-            className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+            className="block p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-medium flex items-center">
+                <h3 className="font-semibold text-gray-900 flex items-center">
                   {message.representative.name}
                   {message.unread && (
-                    <span className="ml-2 w-2 h-2 bg-kenya-red rounded-full"></span>
+                    <span className="ml-2 w-2 h-2 bg-blue-600 rounded-full"></span>
                   )}
                 </h3>
                 <p className="text-gray-600 text-sm mt-1">
@@ -70,7 +70,7 @@ const MessagePreview = ({ isOnline }) => {
           {isOnline && (
             <Link 
               to="/citizen/messages/new" 
-              className="text-kenya-red hover:underline text-sm mt-2 inline-block"
+              className="text-blue-600 hover:text-blue-800 hover:underline text-sm mt-2 inline-block"
             >
               {t('messages.startNewConversation')}
             </Link>
@@ -81,7 +81,7 @@ const MessagePreview = ({ isOnline }) => {
       <div className="text-center mt-4">
         <Link 
           to="/citizen/messages" 
-          className="text-kenya-red hover:underline text-sm"
+          className="text-blue-600 hover:text-blue-800 hover:underline text-sm"
         >
           {t('viewAllMessages')}
         </Link>

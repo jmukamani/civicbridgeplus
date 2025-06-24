@@ -9,7 +9,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "cross-env DEBUG=* nodemon server.js"
+    "dev": "cross-env DEBUG=* nodemon server.js",
+    "migrate:create": "sequelize migration:generate",
+    "migrate:up": "sequelize db:migrate",
+    "migrate:down": "sequelize db:migrate:undo",
+    "migrate:reset": "sequelize db:migrate:undo:all && sequelize db:migrate",
+    "seed:create": "sequelize seed:generate",
+    "seed:up": "sequelize db:seed:all",
+    "seed:down": "sequelize db:seed:undo:all"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

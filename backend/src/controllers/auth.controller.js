@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/postgres/user.model');
+const User = require('../models/postgres/user.model');
 const { redisClient } = require('../config/redis');
 const { sendEmail } = require('../config/email');
 const logger = require('../utils/logger');
@@ -28,8 +28,6 @@ const register = async (req, res, next) => {
       password_hash: password,
       phone_number: phone,
       role,
-      // county_id: ... (if you have it)
-      // constituency_id: ... (if you have it)
     });
 
     // Generate verification token

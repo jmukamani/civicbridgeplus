@@ -36,8 +36,8 @@ const schemas = {
     lastName: Joi.string().required(),
     phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/),
     role: Joi.string().valid('citizen', 'representative', 'admin'),
-    county_id: Joi.string().uuid(),
-    constituency_id: Joi.string().uuid()
+    county_id: Joi.string().uuid().allow(null),
+    constituency_id: Joi.string().uuid().allow(null)
   }),
   login: Joi.object({
     email: Joi.string().email().required(),

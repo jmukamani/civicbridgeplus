@@ -60,16 +60,16 @@ const PolicyFilter = ({ filters, setFilters }) => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-6">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-medium flex items-center">
+        <h3 className="text-base font-semibold flex items-center text-gray-900">
           <Filter size={18} className="mr-2" />
           {t('policyFilter.filterBy')}
         </h3>
         {(filters.category || filters.county || filters.dateRange !== 'all') && (
           <button
             onClick={clearFilters}
-            className="text-sm text-kenya-red hover:underline flex items-center"
+            className="text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center transition-colors"
           >
             <X size={14} className="mr-1" />
             {t('policyFilter.clearAll')}
@@ -80,7 +80,7 @@ const PolicyFilter = ({ filters, setFilters }) => {
       <div className="space-y-4">
         {/* Category Filter */}
         <div>
-          <h4 className="text-sm font-medium mb-2">
+          <h4 className="text-sm font-medium mb-2 text-gray-700">
             {t('policyFilter.category')}
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -88,10 +88,10 @@ const PolicyFilter = ({ filters, setFilters }) => {
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`px-3 py-1 rounded-full text-sm ${
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   filters.category === category
-                    ? 'bg-kenya-red text-white'
-                    : 'bg-gray-100 hover:bg-gray-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
                 {t(`policyCategories.${category}`)}
@@ -102,7 +102,7 @@ const PolicyFilter = ({ filters, setFilters }) => {
 
         {/* County Filter */}
         <div>
-          <h4 className="text-sm font-medium mb-2">
+          <h4 className="text-sm font-medium mb-2 text-gray-700">
             {t('policyFilter.county')}
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -110,10 +110,10 @@ const PolicyFilter = ({ filters, setFilters }) => {
               <button
                 key={county}
                 onClick={() => handleCountyChange(county)}
-                className={`px-3 py-1 rounded-full text-sm ${
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   filters.county === county
-                    ? 'bg-kenya-red text-white'
-                    : 'bg-gray-100 hover:bg-gray-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
                 {county}
@@ -124,7 +124,7 @@ const PolicyFilter = ({ filters, setFilters }) => {
 
         {/* Date Range Filter */}
         <div>
-          <h4 className="text-sm font-medium mb-2">
+          <h4 className="text-sm font-medium mb-2 text-gray-700">
             {t('policyFilter.dateRange')}
           </h4>
           <div className="flex flex-wrap gap-2">
@@ -132,10 +132,10 @@ const PolicyFilter = ({ filters, setFilters }) => {
               <button
                 key={range.value}
                 onClick={() => handleDateRangeChange(range.value)}
-                className={`px-3 py-1 rounded-full text-sm ${
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   filters.dateRange === range.value
-                    ? 'bg-kenya-red text-white'
-                    : 'bg-gray-100 hover:bg-gray-200'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
               >
                 {range.label}

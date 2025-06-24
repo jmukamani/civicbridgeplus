@@ -25,7 +25,7 @@ const redisStore = {
  */
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
   store: redisStore,
   handler: (req, res, next) => {
     next(new TooManyRequestsError('Too many requests, please try again later'));
@@ -37,7 +37,7 @@ const globalLimiter = rateLimit({
  */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // allow more requests for dev
+  max: 1000, // allow more requests for dev
   store: redisStore,
   handler: (req, res, next) => {
     next(new TooManyRequestsError('Too many auth requests, please try again later'));
@@ -54,7 +54,7 @@ const roleBasedLimiter = (req, res, next) => {
     case 'admin':
       limiter = rateLimit({
         windowMs: 15 * 60 * 1000,
-        max: 500,
+        max: 1000,
         store: redisStore
       });
       break;
@@ -68,7 +68,7 @@ const roleBasedLimiter = (req, res, next) => {
     default:
       limiter = rateLimit({
         windowMs: 15 * 60 * 1000,
-        max: 100,
+        max: 1000,
         store: redisStore
       });
   }
