@@ -43,16 +43,10 @@ const RegisterForm = () => {
         role: formData.role,
         county_id: formData.role === 'representative' ? formData.county : null
       };
-  
-      const user = await dispatch(register(registrationData)).unwrap();
-      toast.success('Registration successful!');
-      
-      // Redirect based on role
-      if (user.role === 'citizen') {
-        navigate('/citizen/dashboard');
-      } else if (user.role === 'representative') {
-        navigate('/representative/dashboard');
-      }
+
+      await dispatch(register(registrationData)).unwrap();
+      toast.success('Registration successful! Please check your email to verify your account.');
+      navigate('/login'); // Redirect to login page after registration
     } catch (error) {
       toast.error(error || 'Registration failed');
     }

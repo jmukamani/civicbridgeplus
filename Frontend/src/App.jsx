@@ -6,6 +6,7 @@ import MainLayout from './components/auth/layout/MainLayout';
 import LandingPage from '../src/pages/LandingPage';
 import LoginForm from './components/auth/auth/LoginForm';
 import RegisterForm from './components/auth/auth/RegisterForm';
+import VerifyEmail from "../src/pages/VerifyEmail";
 import Unauthorized from '../src/pages/Unauthorized';
 import NotFound from '../src/pages/NotFound';
 import ProtectedRoute from './components/auth/common/ProtectedRoute';
@@ -34,9 +35,10 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginForm />} />
+
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
-
+          <Route path="/verify-email" element={<VerifyEmail />} />
           {/* Citizen Protected Routes */}
           <Route element={<MainLayout />}>
             <Route element={<ProtectedRoute roles={['citizen']} />}>

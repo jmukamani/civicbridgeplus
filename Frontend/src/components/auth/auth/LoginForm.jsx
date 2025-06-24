@@ -15,15 +15,21 @@ const LoginForm = () => {
     e.preventDefault();
     try {
       const user = await dispatch(login({ email, password })).unwrap();
+      console.log('User after login:', user);
       toast.success('Login successful!');
       
       // Redirect based on role
       if (user.role === 'citizen') {
+        console.log('Redirecting to /citizen/dashboard');
         navigate('/citizen/dashboard');
       } else if (user.role === 'representative') {
+        console.log('Redirecting to /representative/dashboard');
         navigate('/representative/dashboard');
       } else if (user.role === 'admin') {
+        console.log('Redirecting to /admin/dashboard');
         navigate('/admin/dashboard');
+      } else {
+        console.log('No matching role for redirect:', user.role);
       }
     } catch (error) {
       toast.error(error || 'Login failed');

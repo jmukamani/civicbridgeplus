@@ -45,7 +45,6 @@ function mapUser(user) {
     lastName: user.last_name,
     county: user.county_id,
     constituency: user.constituency_id,
-    // add more mappings as needed
   };
 }
 
@@ -53,6 +52,7 @@ export const login = (credentials) => async (dispatch) => {
   try {
     dispatch(setLoading(true));
     const response = await api.post('/auth/login', credentials);
+    console.log('Login API response:', response.data);
     let { user, token } = response.data.data;
     user = mapUser(user);
     localStorage.setItem('token', token);
