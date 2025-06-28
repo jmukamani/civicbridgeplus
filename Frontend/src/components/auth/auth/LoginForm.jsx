@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { login } from "../../../slices/authSlice";
 import { toast } from 'react-hot-toast';
+import { store } from '../../../store/store';
 
 const LoginForm = () => {
+  console.log('LoginForm component rendered'); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
@@ -12,29 +14,46 @@ const LoginForm = () => {
   const { loading, error } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const user = await dispatch(login({ email, password })).unwrap();
-      console.log('User after login:', user);
-      toast.success('Login successful!');
+  e.preventDefault();
+  console.log('handleSubmit called'); // Debug log
+  
+  try {
+    console.log('About to dispatch login...'); // Debug log
+    const result = await dispatch(login({ email, password })).unwrap();
+    console.log('Login result:', result); // Debug log
+    
+    // Check Redux state after login
+    const currentState = store.getState();
+    console.log('Redux state after login:', currentState.auth);
+    
+    toast.success('Login successful!');
+    
+    // Ensure we have user data before redirecting
+    if (result?.user?.role) {
+      const redirectPath = {
+        citizen: '/citizen/dashboard',
+        representative: '/representative/dashboard',
+        admin: '/admin/dashboard'
+      }[result.user.role];
       
-      // Redirect based on role
-      if (user.role === 'citizen') {
-        console.log('Redirecting to /citizen/dashboard');
-        navigate('/citizen/dashboard');
-      } else if (user.role === 'representative') {
-        console.log('Redirecting to /representative/dashboard');
-        navigate('/representative/dashboard');
-      } else if (user.role === 'admin') {
-        console.log('Redirecting to /admin/dashboard');
-        navigate('/admin/dashboard');
-      } else {
-        console.log('No matching role for redirect:', user.role);
-      }
-    } catch (error) {
-      toast.error(error || 'Login failed');
+      console.log('Navigating to:', redirectPath);
+      navigate(redirectPath);
+      
+      // Force refresh if still on login page after 1 second
+      setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('Still on login page, forcing redirect...');
+          window.location.href = redirectPath;
+        }
+      }, 1000);
+    } else {
+      console.log('No user role found in result:', result);
     }
-  };
+  } catch (error) {
+    console.log('Login error caught:', error); // Debug log
+    toast.error(error || 'Login failed');
+  }
+};
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-sm border border-gray-200">

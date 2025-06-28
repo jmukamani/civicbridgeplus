@@ -16,8 +16,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
-);
+  (error) => {
+    console.error('Request error:', error);
+  return Promise.reject(error);
+});
 
 // Response interceptor
 api.interceptors.response.use(

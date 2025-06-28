@@ -237,4 +237,36 @@ router.get('/search', verifyToken, messageController.searchMessages);
  */
 router.get('/stats', verifyToken, messageController.getMessageStats);
 
+/**
+ * @swagger
+ * /api/messages/unread-count:
+ *   get:
+ *     summary: Get unread message count
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unread message count
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/unread-count', verifyToken, messageController.getUnreadCount);
+
+/**
+ * @swagger
+ * /api/messages/recent:
+ *   get:
+ *     summary: Get recent messages
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of recent messages
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/recent', verifyToken, messageController.getRecentMessages);
+
 module.exports = router;

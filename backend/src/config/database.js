@@ -10,10 +10,10 @@ const sequelize = new Sequelize(
     port: process.env.POSTGRES_PORT,
     dialect: 'postgres',
     pool: {
-      max: parseInt(process.env.POSTGRES_POOL_MAX),
-      min: parseInt(process.env.POSTGRES_POOL_MIN),
-      idle: parseInt(process.env.POSTGRES_POOL_IDLE),
-      acquire: parseInt(process.env.POSTGRES_POOL_ACQUIRE)
+      max: parseInt(process.env.POSTGRES_POOL_MAX) || 5,
+      min: parseInt(process.env.POSTGRES_POOL_MIN) || 0,
+      idle: parseInt(process.env.POSTGRES_POOL_IDLE) || 10000,
+      acquire: parseInt(process.env.POSTGRES_POOL_ACQUIRE) || 30000
     },
     logging: process.env.NODE_ENV === 'development' ? msg => logger.debug(msg) : false,
     dialectOptions: {

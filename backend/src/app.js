@@ -17,6 +17,7 @@ const messageRoutes = require('./routes/message.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const adminRoutes = require('./routes/admin.routes');
+const representativeRoutes = require('./routes/representative.routes');
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/representatives', representativeRoutes);
 
 // Swagger documentation
 swaggerSetup(app);

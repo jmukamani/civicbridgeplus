@@ -10,7 +10,7 @@ export const useAuth = () => {
     // Check token expiration if needed
   }, [token]);
 
-  const logout = () => {
+  const logoutFn = () => {
     dispatch(logoutUser());
   };
 
@@ -20,6 +20,6 @@ export const useAuth = () => {
     isAuthenticated: !!token,
     loading,
     error,
-    logout,
+    logout: logoutFn,
   };
 };

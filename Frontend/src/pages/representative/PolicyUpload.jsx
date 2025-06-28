@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { Upload, X, FileText } from 'lucide-react';
@@ -14,7 +14,8 @@ const PolicyUpload = () => {
     title: '',
     category: 'health',
     description: '',
-    counties: [],
+    county_id: '',
+    document_type: 'policy',
     file: null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,12 +35,10 @@ const PolicyUpload = () => {
     });
   };
 
-  const handleCountyToggle = (county) => {
-    setFormData(prev => {
-      const newCounties = prev.counties.includes(county)
-        ? prev.counties.filter(c => c !== county)
-        : [...prev.counties, county];
-      return { ...prev, counties: newCounties };
+  const handleCountyChange = (e) => {
+    setFormData({
+      ...formData,
+      county_id: e.target.value
     });
   };
 
@@ -63,10 +62,11 @@ const PolicyUpload = () => {
       formPayload.append('title', formData.title);
       formPayload.append('category', formData.category);
       formPayload.append('description', formData.description);
-      formData.counties.forEach(county => formPayload.append('counties', county));
+      formPayload.append('county_id', formData.county_id);
+      formPayload.append('document_type', formData.document_type);
       formPayload.append('file', formData.file);
 
-      await api.post('/representatives/policies', formPayload, {
+      await api.post('/policies', formPayload, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -148,22 +148,18 @@ const PolicyUpload = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             {t('repPolicies.applicableCounties')}
           </label>
-          <div className="flex flex-wrap gap-2">
+          <select
+            name="county_id"
+            value={formData.county_id}
+            onChange={handleCountyChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white"
+            required
+          >
+            <option value="" disabled>{t('repPolicies.selectCounty')}</option>
             {allCounties.map(county => (
-              <button
-                key={county}
-                type="button"
-                onClick={() => handleCountyToggle(county)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  formData.counties.includes(county)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                {county}
-              </button>
+              <option key={county} value={county}>{county}</option>
             ))}
-          </div>
+          </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

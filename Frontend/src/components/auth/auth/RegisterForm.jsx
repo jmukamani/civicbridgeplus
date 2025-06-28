@@ -34,7 +34,7 @@ const RegisterForm = () => {
     }
     
     try {
-      const registrationData = {
+       await dispatch(register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -42,11 +42,10 @@ const RegisterForm = () => {
         phone: formData.phone,
         role: formData.role,
         county_id: formData.role === 'representative' ? formData.county : null
-      };
+      })).unwrap();
 
-      await dispatch(register(registrationData)).unwrap();
       toast.success('Registration successful! Please check your email to verify your account.');
-      navigate('/login'); // Redirect to login page after registration
+      navigate('/verify-email-pending'); // Redirect to login page after registration
     } catch (error) {
       toast.error(error || 'Registration failed');
     }
@@ -190,6 +189,7 @@ const RegisterForm = () => {
         >
           {loading ? 'Registering...' : 'Register'}
         </button>
+        {error && <div className="error">{error}</div>}
       </form>
       <div className="mt-4 text-center">
         <a href="/login" className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">

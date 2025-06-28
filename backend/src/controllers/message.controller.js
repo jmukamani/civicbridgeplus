@@ -1,4 +1,4 @@
-const { Message } = require('../models/postgres/message.model');
+const Message = require('../models/postgres/message.model');
 const User = require('../models/postgres/user.model');
 const logger = require('../utils/logger');
 const { APIError, NotFoundError, ForbiddenError } = require('../utils/response');
@@ -402,6 +402,26 @@ const getMessageStats = async (req, res, next) => {
   }
 };
 
+// Get unread message count for the logged-in user
+const getUnreadCount = async (req, res, next) => {
+  try {
+    // Placeholder: return 0 for now
+    res.status(200).json({ success: true, unreadCount: 0 });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get recent messages for the logged-in user
+const getRecentMessages = async (req, res, next) => {
+  try {
+    // Placeholder: return empty array for now
+    res.status(200).json({ success: true, messages: [] });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMessages,
   getThread,
@@ -410,5 +430,7 @@ module.exports = {
   getConversations,
   deleteMessage,
   searchMessages,
-  getMessageStats
+  getMessageStats,
+  getUnreadCount,
+  getRecentMessages,
 };

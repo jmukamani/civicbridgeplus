@@ -8,6 +8,7 @@ import MessagePreview from './MessagePreview';
 import { Bookmark, MessageSquare, FileText, User } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import LoadingSpinner from '../../components/auth/common/LoadingSpinner';
 
 const CitizenDashboard = () => {
   const { t } = useTranslation();

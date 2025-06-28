@@ -1,4 +1,4 @@
-const { Policy } = require('../models/postgres/policy.model');
+const Policy = require('../models/postgres/policy.model');
 const { County } = require('../models/postgres/county.model');
 const User = require('../models/postgres/user.model');
 const { upload, deleteFile } = require('../config/storage');
@@ -6,17 +6,21 @@ const logger = require('../utils/logger');
 const { APIError, NotFoundError, ForbiddenError } = require('../utils/response');
 const fs = require('fs');
 const path = require('path');
+const { sequelize } = require('../config/database');
+const Sequelize = require('sequelize');
 
 /**
  * Get all policies with filtering and pagination
  */
 const getAllPolicies = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, county_id, category, search } = req.query;
+    const { page = 1, limit = 10, county, county_id, category, search } = req.query;
     const offset = (page - 1) * limit;
 
     const where = {};
-    if (county_id) where.county_id = county_id;
+    // Accept both county and county_id, ignore if undefined or 'undefined'
+    const effectiveCounty = county_id || county;
+    if (effectiveCounty && effectiveCounty !== 'undefined') where.county_id = effectiveCounty;
     if (category) where.category = category;
 
     if (search) {

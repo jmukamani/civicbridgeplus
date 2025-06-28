@@ -19,11 +19,8 @@ const Policy = sequelize.define('Policy', {
     allowNull: false
   },
   county_id: {
-    type: DataTypes.UUID,
-    references: {
-      model: 'Counties',
-      key: 'id'
-    }
+    type: DataTypes.STRING,
+    allowNull: false
   },
   file_path: {
     type: DataTypes.STRING,

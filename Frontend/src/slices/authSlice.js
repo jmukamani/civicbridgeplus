@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 
 const initialState = {
@@ -7,6 +7,32 @@ const initialState = {
   loading: false,
   error: null,
 };
+
+// Create async thunk for login
+export const login = createAsyncThunk(
+  'auth/login',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/login', credentials);
+      console.log('Full login response:', response); // Debug log
+      
+      // Extract data from correct response structure
+      const { token, refreshToken, user } = response.data.data || response.data;
+      
+      // Store both tokens
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      
+      return { 
+        user: mapUser(user),
+        token,
+        refreshToken 
+      };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -31,6 +57,24 @@ const authSlice = createSlice({
       state.error = null;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(login.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
+        const { user, token, refreshToken } = action.payload;
+        state.user = user;
+        state.token = token;
+        state.error = null;
+      })
+      .addCase(login.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
 });
 
 export const { setCredentials, logout, setLoading, setError, clearError } = authSlice.actions;
@@ -47,24 +91,6 @@ function mapUser(user) {
     constituency: user.constituency_id,
   };
 }
-
-export const login = (credentials) => async (dispatch) => {
-  try {
-    dispatch(setLoading(true));
-    const response = await api.post('/auth/login', credentials);
-    console.log('Login API response:', response.data);
-    let { user, token } = response.data.data;
-    user = mapUser(user);
-    localStorage.setItem('token', token);
-    dispatch(setCredentials({ user, token }));
-    dispatch(setLoading(false));
-    return user;
-  } catch (error) {
-    dispatch(setError(error.response?.data?.message || 'Login failed'));
-    dispatch(setLoading(false));
-    throw error;
-  }
-};
 
 export const register = (userData) => async (dispatch) => {
   try {

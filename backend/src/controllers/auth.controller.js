@@ -12,7 +12,7 @@ const { APIError, BadRequestError } = require('../utils/response');
  */
 const register = async (req, res, next) => {
   try {
-    const { firstName, lastName, email, password, phone, role } = req.body;
+    const { firstName, lastName, email, password, phone, role, county_id, constituency_id } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
@@ -20,15 +20,17 @@ const register = async (req, res, next) => {
       throw new BadRequestError('Email already in use');
     }
 
-    // Create new user
-    const user = await User.create({
+    const userData = {
       first_name: firstName,
       last_name: lastName,
       email,
       password_hash: password,
       phone_number: phone,
-      role,
-    });
+      role
+    };
+
+    // Create new user
+    const user = await User.create(userData);
 
     // Generate verification token
     const verificationToken = jwt.sign(
@@ -229,7 +231,14 @@ const resetPassword = async (req, res, next) => {
  */
 const verifyToken = async (req, res, next) => {
   try {
-    const { token } = req.body;
+    // Debug log
+    console.log('verifyToken req.body:', req.body, 'req.query:', req.query);
+    // Use optional chaining for safety
+    const token = req.body?.token || req.query?.token;
+
+    if (!token) {
+      throw new BadRequestError('No token provided');
+    }
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

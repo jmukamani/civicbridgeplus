@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { toast } from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { Mail, FileText, Users, Clock, AlertCircle } from 'lucide-react';
+import { Mail, FileText, Users, Clock, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 
 const RepresentativeDashboard = () => {
   const { t } = useTranslation();
@@ -19,6 +20,25 @@ const RepresentativeDashboard = () => {
   });
   const [activityData, setActivityData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper functions for caching
+  const cacheData = async (key, data) => {
+    try {
+      localStorage.setItem(`cache_${key}`, JSON.stringify(data));
+    } catch (error) {
+      console.error('Error caching data:', error);
+    }
+  };
+
+  const getCachedData = async (key) => {
+    try {
+      const cached = localStorage.getItem(`cache_${key}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error('Error getting cached data:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -43,28 +63,35 @@ const RepresentativeDashboard = () => {
           
           if (cachedMetrics) setMetrics(cachedMetrics);
           if (cachedActivity) setActivityData(cachedActivity);
-          toast(t('offlineDataWarning'), { icon: '⚠️' });
+          toast('Using cached data (offline mode)', { icon: '⚠️' });
         }
       } catch (error) {
-        toast.error(t('error.fetchingData'));
+        console.error('Error fetching dashboard data:', error);
+        toast.error('Error fetching data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, [isOnline, t]);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [isOnline, user]);
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <div>Loading...</div>;
+
+  if (!user) {
+    return <div>Loading user data...</div>;
+  }
 
   return (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h1 className="text-2xl font-bold text-gray-900">
-          {t('repDashboard.title')}, {user.firstName}
+          Representative Dashboard, {user.firstName || user.first_name}
         </h1>
         <p className="text-gray-600 mt-2">
-          {t('repDashboard.subtitle', { county: user.county })}
+          Manage your constituency and policies
         </p>
       </div>
 
@@ -72,28 +99,28 @@ const RepresentativeDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           icon={<Mail className="text-blue-600" size={24} />}
-          title={t('repDashboard.pendingMessages')}
+          title="Pending Messages"
           value={metrics.pendingMessages}
           trend={metrics.pendingMessages > 0 ? 'up' : 'neutral'}
           link="/representative/messages"
         />
         <StatCard 
           icon={<FileText className="text-blue-600" size={24} />}
-          title={t('repDashboard.publishedPolicies')}
+          title="Published Policies"
           value={metrics.publishedPolicies}
           trend="neutral"
           link="/representative/policies"
         />
         <StatCard 
           icon={<Users className="text-blue-600" size={24} />}
-          title={t('repDashboard.constituents')}
+          title="Constituents"
           value={metrics.constituents}
           trend="neutral"
           link="/representative/constituents"
         />
         <StatCard 
           icon={<Clock className="text-blue-600" size={24} />}
-          title={t('repDashboard.avgResponseTime')}
+          title="Avg Response Time"
           value={`${metrics.avgResponseTime}h`}
           trend={metrics.avgResponseTime > 24 ? 'down' : 'up'}
         />
@@ -102,7 +129,7 @@ const RepresentativeDashboard = () => {
       {/* Activity Chart */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-6 text-gray-900">
-          {t('repDashboard.messageActivity')}
+          Message Activity
         </h2>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -111,12 +138,12 @@ const RepresentativeDashboard = () => {
               <YAxis />
               <Bar 
                 dataKey="incoming" 
-                name={t('repDashboard.incomingMessages')}
+                name="Incoming Messages"
                 fill="#059669" 
               />
               <Bar 
                 dataKey="outgoing" 
-                name={t('repDashboard.outgoingMessages')}
+                name="Outgoing Messages"
                 fill="#2563eb" 
               />
             </BarChart>
@@ -127,26 +154,26 @@ const RepresentativeDashboard = () => {
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold mb-4 text-gray-900">
-          {t('repDashboard.quickActions')}
+          Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ActionButton 
-            title={t('repDashboard.respondToMessages')}
-            description={t('repDashboard.respondToMessagesDesc')}
+            title="Respond to Messages"
+            description="Reply to constituent messages"
             icon={<Mail size={20} />}
             link="/representative/messages"
             variant="primary"
           />
           <ActionButton 
-            title={t('repDashboard.uploadPolicy')}
-            description={t('repDashboard.uploadPolicyDesc')}
+            title="Upload Policy"
+            description="Upload new policy documents"
             icon={<FileText size={20} />}
             link="/representative/policies/upload"
             variant="secondary"
           />
           <ActionButton 
-            title={t('repDashboard.viewConstituents')}
-            description={t('repDashboard.viewConstituentsDesc')}
+            title="View Constituents"
+            description="Manage your constituents"
             icon={<Users size={20} />}
             link="/representative/constituents"
             variant="neutral"
@@ -199,7 +226,7 @@ const ActionButton = ({ title, description, icon, link, variant }) => {
         <div className="mr-3 p-2 bg-white bg-opacity-20 rounded-full">{icon}</div>
         <h3 className="font-semibold text-lg">{title}</h3>
       </div>
-      <p className="text-gray-600 text-sm">{description}</p>
+      <p className="text-sm opacity-90">{description}</p>
     </Link>
   );
 };

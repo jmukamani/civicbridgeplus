@@ -8,7 +8,7 @@ import {
   sendMessage,
   markAsRead
 } from '../../services/messageService';
-import './ConversationList';
+import ConversationList from './ConversationList';
 import MessageThread from './MessageThread';
 import NewMessageModal from './NewMessageModal';
 import { toast } from 'react-hot-toast';
@@ -50,7 +50,7 @@ const MessageCenter = () => {
     };
 
     fetchConversations();
-  }, [isOnline, t]);
+  }, [isOnline]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -78,7 +78,7 @@ const MessageCenter = () => {
 
       fetchMessages();
     }
-  }, [selectedConversation, isOnline, user.id, t]);
+  }, [selectedConversation, isOnline, user.id]);
 
   const handleSendMessage = async () => {
     if (!isOnline) {

@@ -14,7 +14,7 @@ const VerifyEmail = () => {
       return;
     }
     axios
-      .get(`http://localhost:3000/api/auth/verify/${token}`)
+      .get(`http://localhost:3000/api/auth/verify-token?token=${token}`)
       .then(() => {
         setStatus("Email verified! Redirecting to login...");
         setTimeout(() => navigate("/login"), 2000);

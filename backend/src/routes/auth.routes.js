@@ -170,7 +170,6 @@ router.post('/reset-password', authLimiter, authController.resetPassword);
  *         description: Invalid token
  */
 router.get('/verify-token', authController.verifyToken);
-
 /**
  * @swagger
  * /api/auth/refresh-token:

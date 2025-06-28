@@ -36,8 +36,8 @@ const schemas = {
     lastName: Joi.string().required(),
     phone: Joi.string().pattern(/^\+?[0-9]{10,15}$/),
     role: Joi.string().valid('citizen', 'representative', 'admin'),
-    county_id: Joi.string().uuid().allow(null),
-    constituency_id: Joi.string().uuid().allow(null)
+    county_id: Joi.string().allow(null, ''),
+    constituency_id: Joi.string().allow(null, '')
   }),
   login: Joi.object({
     email: Joi.string().email().required(),
@@ -47,7 +47,7 @@ const schemas = {
     title: Joi.string().required(),
     description: Joi.string().allow(''),
     category: Joi.string().required(),
-    county_id: Joi.string().uuid().required(),
+    county_id: Joi.string().required(),
     document_type: Joi.string().valid('policy', 'regulation', 'report', 'other').required()
   }),
   message: Joi.object({

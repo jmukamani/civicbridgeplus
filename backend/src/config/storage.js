@@ -38,12 +38,11 @@ const upload = multer({
 });
 
 const deleteFile = (filePath) => {
-  const fullPath = path.join(uploadDir, filePath);
-  fs.unlink(fullPath, (err) => {
+  fs.unlink(filePath, (err) => {
     if (err) {
-      logger.error(`Failed to delete file: ${fullPath}`, err);
+      logger.error(`Failed to delete file: ${filePath}`, err);
     } else {
-      logger.info(`Successfully deleted file: ${fullPath}`);
+      logger.info(`Successfully deleted file: ${filePath}`);
     }
   });
 };
